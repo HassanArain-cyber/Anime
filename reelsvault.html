@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#0b0b12"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="AnimeVault"/>
+<meta name="description" content="Your personal anime tracker — watch, rate, review."/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="apple-touch-icon" href="https://placehold.co/192x192/e63462/ffffff?text=AV"/>
+<title>AnimeVault — My List</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- PAGE LOADER -->
+<div id="loader">
+  <div class="loader-logo">ANIMEVAULT</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
+<div class="wp-overlay" id="wpOverlay"></div>
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">🎌</div>
+    <span class="nav-logo-text">ANIMEVAULT</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html"      class="nav-link active">🏠 My List</a>
+    <a href="watchlist.html"  class="nav-link">📋 Watchlist <span class="badge wl-badge" style="display:none">0</span></a>
+    <a href="categories.html" class="nav-link">🎭 Categories</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    <button class="hamburger" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html"      class="nav-link active">🏠 My List</a>
+  <a href="watchlist.html"  class="nav-link">📋 Watchlist</a>
+  <a href="categories.html" class="nav-link">🎭 Categories</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="wrapper">
+  <div class="page-content">
+
+    <!-- Hero -->
+    <div class="page-hero">
+      <div class="page-hero-tag">🎌 Personal Anime Tracker</div>
+      <h1>MY ANIME LIST</h1>
+      <p>Your personal vault of every anime you've watched, rated, and reviewed.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-pill">
+        <span class="stat-icon">🎬</span>
+        <div class="stat-info">
+          <div class="stat-num" id="statTotal">0</div>
+          <div class="stat-label">Total Anime</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-icon">👁️</span>
+        <div class="stat-info">
+          <div class="stat-num" id="statWatching">0</div>
+          <div class="stat-label">Watching</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-icon">✅</span>
+        <div class="stat-info">
+          <div class="stat-num" id="statDone">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-icon">❤️</span>
+        <div class="stat-info">
+          <div class="stat-num" id="statFavs">0</div>
+          <div class="stat-label">Favourites</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchBox" placeholder="Search anime…" autocomplete="off"/>
+        </div>
+        <select class="filter-select" id="genreFilter">
+          <option value="All">All Genres</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <select class="filter-select" id="sortSel">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="az">A → Z</option>
+          <option value="za">Z → A</option>
+          <option value="rating">Top Rated</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="anime-grid" id="animeGrid"></div>
+
+  </div>
+</main>
+
+<!-- FAB -->
+<button class="fab" id="fab" title="Add Anime">＋</button>
+<button class="random-btn" id="randomBtn" title="🎲 Surprise me!">🎲</button>
+<button class="customize-fab" onclick="openCustomize()" title="Customize">🎨</button>
+
+<!-- ═══ CUSTOMIZE MODAL ═══ -->
+<div class="customize-overlay" id="customizeModal" onclick="czBgClose(event)">
+  <div class="customize-sheet">
+    <div class="cz-header">
+      <div class="cz-title">CUSTOMIZE</div>
+      <button class="cz-close" onclick="closeCustomize()">✕</button>
+    </div>
+
+    <!-- Wallpaper -->
+    <div class="cz-section">
+      <div class="cz-section-title">🖼️ Wallpaper</div>
+      <div class="wp-prev-box" id="avWpPrev" onclick="document.getElementById('avWpFile').click()">
+        <span id="avWpTxt">📁 Tap to choose image from gallery</span>
+      </div>
+      <input type="file" id="avWpFile" accept="image/*" style="display:none" onchange="setAvWp(event)"/>
+      <div class="slider-row" style="margin-top:10px">
+        <span style="font-size:12px;color:var(--muted);white-space:nowrap">Darkness</span>
+        <input type="range" id="avWpOp" min="0" max="95" value="80" oninput="setAvWpOp(this.value)"/>
+        <span style="font-size:12px;color:var(--muted);white-space:nowrap;min-width:34px;text-align:right" id="avWpOpVal">80%</span>
+      </div>
+      <button class="cz-apply" style="margin-top:10px;background:var(--surface2);color:var(--muted);box-shadow:none;border:1.5px solid var(--border)" onclick="removeAvWp()">Remove Wallpaper</button>
+    </div>
+
+    <!-- Site name -->
+    <div class="cz-section">
+      <div class="cz-section-title">🏷️ Site Name</div>
+      <input class="cz-input" id="czSiteName" placeholder="e.g. Hassan's Vault" maxlength="30"/>
+      <input class="cz-input" id="czTagline" placeholder="Tagline e.g. My Anime World" maxlength="50"/>
+    </div>
+
+    <!-- Accent color -->
+    <div class="cz-section">
+      <div class="cz-section-title">🎨 Accent Color</div>
+      <div class="color-grid" id="colorGrid">
+        <div class="color-swatch on" data-c1="#e63462" data-c2="#ff9f43" style="background:linear-gradient(135deg,#e63462,#ff9f43)" onclick="pickColor(this)"></div>
+        <div class="color-swatch" data-c1="#6c63ff" data-c2="#ff6584" style="background:linear-gradient(135deg,#6c63ff,#ff6584)" onclick="pickColor(this)"></div>
+        <div class="color-swatch" data-c1="#00b4d8" data-c2="#90e0ef" style="background:linear-gradient(135deg,#00b4d8,#90e0ef)" onclick="pickColor(this)"></div>
+        <div class="color-swatch" data-c1="#06d6a0" data-c2="#118ab2" style="background:linear-gradient(135deg,#06d6a0,#118ab2)" onclick="pickColor(this)"></div>
+        <div class="color-swatch" data-c1="#f72585" data-c2="#b5179e" style="background:linear-gradient(135deg,#f72585,#b5179e)" onclick="pickColor(this)"></div>
+        <div class="color-swatch" data-c1="#fb5607" data-c2="#ffbe0b" style="background:linear-gradient(135deg,#fb5607,#ffbe0b)" onclick="pickColor(this)"></div>
+        <div class="color-swatch" data-c1="#7b2d8b" data-c2="#c77dff" style="background:linear-gradient(135deg,#7b2d8b,#c77dff)" onclick="pickColor(this)"></div>
+        <div class="color-swatch" data-c1="#ffffff" data-c2="#aaaaaa" style="background:linear-gradient(135deg,#fff,#aaa)" onclick="pickColor(this)"></div>
+      </div>
+    </div>
+
+    <!-- Card style -->
+    <div class="cz-section">
+      <div class="cz-section-title">🃏 Card Style</div>
+      <div class="style-opts">
+        <div class="style-opt on" data-style="rounded" onclick="pickStyle(this)">
+          <div class="so-preview">⬜</div>Rounded
+        </div>
+        <div class="style-opt" data-style="sharp" onclick="pickStyle(this)">
+          <div class="so-preview">🔲</div>Sharp
+        </div>
+        <div class="style-opt" data-style="glass" onclick="pickStyle(this)">
+          <div class="so-preview">🪟</div>Glass
+        </div>
+      </div>
+    </div>
+
+    <button class="cz-apply" onclick="applyCustomize()">✨ Apply Changes</button>
+  </div>
+</div>
+
+<!-- ═══ ADD MODAL ═══ -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">ADD ANIME</div>
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <form id="addForm">
+      <div class="form-group">
+        <label class="form-label">Anime Name</label>
+        <div class="anime-search-wrap">
+          <input class="form-input" id="addSearch" type="text"
+            placeholder="Search anime name (e.g. Naruto)…"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+          <span class="searching-spin" id="addSpin">⟳</span>
+          <div class="sug-list" id="addSugs"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <div class="status-group" id="addStatusGroup">
+          <button type="button" class="status-chip-btn on" data-status="Watching">👁️ Watching</button>
+          <button type="button" class="status-chip-btn" data-status="Completed">✅ Completed</button>
+          <button type="button" class="status-chip-btn" data-status="Plan to Watch">📋 Plan</button>
+          <button type="button" class="status-chip-btn" data-status="Pending">⏸️ Pending</button>
+          <button type="button" class="status-chip-btn" data-status="Dropped">❌ Dropped</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Episodes Watched</label>
+          <input class="form-input" id="addEpsW" type="number" min="0" placeholder="e.g. 12"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Episodes</label>
+          <input class="form-input" id="addEpsT" type="number" min="0" placeholder="e.g. 24"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-stars">
+          <label>Your Rating</label>
+          <div class="star-pick" id="addStarPick" data-val="0">
+            <span class="sp" data-v="1">★</span>
+            <span class="sp" data-v="2">★</span>
+            <span class="sp" data-v="3">★</span>
+            <span class="sp" data-v="4">★</span>
+            <span class="sp" data-v="5">★</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes / Review</label>
+        <textarea class="form-input" id="addNotes" rows="3" placeholder="Your thoughts about this anime…"></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">🎌 Add to My List</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ EDIT MODAL ═══ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="editTitle">EDIT ANIME</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <form id="editForm" onsubmit="handleEdit(event)">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <div class="status-group" id="editStatusGroup">
+          <button type="button" class="status-chip-btn on" data-status="Watching">👁️ Watching</button>
+          <button type="button" class="status-chip-btn" data-status="Completed">✅ Completed</button>
+          <button type="button" class="status-chip-btn" data-status="Plan to Watch">📋 Plan</button>
+          <button type="button" class="status-chip-btn" data-status="Pending">⏸️ Pending</button>
+          <button type="button" class="status-chip-btn" data-status="Dropped">❌ Dropped</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Episodes Watched</label>
+          <input class="form-input" id="editEpsW" type="number" min="0" placeholder="e.g. 12"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Episodes</label>
+          <input class="form-input" id="editEpsT" type="number" min="0" placeholder="e.g. 24"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-stars">
+          <label>Your Rating</label>
+          <div class="star-pick" id="editStarPick" data-val="0">
+            <span class="sp" data-v="1">★</span>
+            <span class="sp" data-v="2">★</span>
+            <span class="sp" data-v="3">★</span>
+            <span class="sp" data-v="4">★</span>
+            <span class="sp" data-v="5">★</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes / Review</label>
+        <textarea class="form-input" id="editNotes" rows="3" placeholder="Your thoughts…"></textarea>
+      </div>
+      <button type="submit" class="submit-btn">💾 Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ RANDOM MODAL ═══ -->
+<div class="modal-overlay" id="randomModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🎲 SURPRISE!</div>
+      <button class="modal-close" onclick="closeRandomModal()">✕</button>
+    </div>
+    <div class="random-card">
+      <div class="random-poster">
+        <img id="randomPoster" src="" alt=""/>
+      </div>
+      <div class="random-title" id="randomTitle"></div>
+      <div class="random-genre" id="randomGenre"></div>
+      <div class="card-stars" id="randomStars" style="justify-content:center;font-size:18px"></div>
+      <div class="random-action">
+        <button class="submit-btn" style="flex:1;max-width:160px;padding:12px" onclick="rerollRandom()">🎲 Another!</button>
+        <button class="submit-btn" style="flex:1;max-width:160px;padding:12px;background:var(--surface2);color:var(--text);box-shadow:none" onclick="closeRandomModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
+<script>initIndexPage();</script>
+</body>
+</html>

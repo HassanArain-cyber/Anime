@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#0a0a12"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="MyVault"/>
+<link rel="manifest" href="manifest.json"/>
+<title>MyVault</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --acc:#e63462; --acc2:#ff9f43; --purple:#6c63ff;
+  --font-h:'Bebas Neue',sans-serif;
+  --font-b:'Nunito',system-ui,sans-serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a12;font-family:var(--font-b);-webkit-font-smoothing:antialiased;user-select:none;}
+
+/* SPLASH */
+.splash{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;cursor:pointer;transition:transform .7s cubic-bezier(.77,0,.18,1),opacity .5s ease;}
+.splash.exit{transform:translateY(-100%);opacity:0;pointer-events:none;}
+
+/* BG */
+.splash-bg{position:absolute;inset:0;z-index:0;background:#0a0a12;background-size:cover;background-position:center top;}
+.splash-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 50%,rgba(0,0,0,.88) 80%,rgba(0,0,0,.97) 100%);}
+.no-bg-art{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(108,99,255,.25) 0%,transparent 70%),radial-gradient(ellipse 60% 50% at 80% 80%,rgba(230,52,98,.15) 0%,transparent 60%),#0a0a12;}
+.no-bg-art .big-icon{font-size:120px;opacity:.12;filter:grayscale(1);}
+
+/* CHANGE BG */
+.change-bg-btn{position:absolute;z-index:3;top:calc(env(safe-area-inset-top) + 54px);right:16px;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:7px 14px;color:rgba(255,255,255,.8);font-family:var(--font-b);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;-webkit-tap-highlight-color:transparent;animation:fadeD .8s .4s both;}
+.change-bg-btn:hover{background:rgba(255,255,255,.2);}
+input#bgPicker{display:none}
+
+/* TOP BAR */
+.splash-top{position:relative;z-index:2;padding:calc(env(safe-area-inset-top) + 18px) 22px 0;display:flex;align-items:flex-start;justify-content:space-between;animation:fadeD .8s .2s both;}
+.splash-time{font-family:var(--font-h);font-size:54px;letter-spacing:2px;color:rgba(255,255,255,.9);line-height:1;text-shadow:0 2px 20px rgba(0,0,0,.8);}
+.splash-date-col{text-align:right;padding-top:4px;}
+.splash-date{font-size:13px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.5px;}
+.splash-day{font-size:16px;color:rgba(255,255,255,.8);font-weight:800;margin-top:2px;}
+
+/* MIDDLE */
+.splash-mid{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;animation:fadeD .9s .3s both;}
+.greeting-tag{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--acc);background:rgba(230,52,98,.15);border:1px solid rgba(230,52,98,.3);padding:5px 14px;border-radius:99px;margin-bottom:14px;}
+.greeting-name{font-family:var(--font-h);font-size:clamp(44px,10vw,72px);letter-spacing:3px;line-height:1;text-align:center;text-shadow:0 4px 30px rgba(0,0,0,.9);background:linear-gradient(135deg,#fff 40%,rgba(255,255,255,.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.greeting-sub{font-size:14px;color:rgba(255,255,255,.5);margin-top:10px;text-align:center;line-height:1.6;max-width:280px;font-style:italic;text-shadow:0 2px 10px rgba(0,0,0,.8);}
+.quote-mark{color:var(--acc);font-style:normal;font-size:18px;}
+
+/* STATS */
+.splash-stats{position:relative;z-index:2;display:flex;justify-content:center;gap:10px;padding:0 22px;margin-bottom:16px;animation:fadeD .9s .5s both;}
+.sstat{flex:1;max-width:110px;background:rgba(255,255,255,.08);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 8px;text-align:center;}
+.sstat-icon{font-size:18px;margin-bottom:3px;}
+.sstat-n{font-family:var(--font-h);font-size:26px;letter-spacing:1px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sstat-l{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;font-weight:700;}
+
+/* APP LINKS */
+.app-links{position:relative;z-index:2;display:flex;gap:10px;padding:0 22px;margin-bottom:18px;animation:fadeD .9s .6s both;}
+.app-link{flex:1;background:rgba(255,255,255,.1);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;text-decoration:none;}
+.app-link:hover,.app-link:active{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);transform:translateY(-2px);}
+.app-link-icon{width:48px;height:48px;border-radius:14px;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.2);}
+.app-link-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+.app-link-name{font-size:13px;font-weight:800;color:rgba(255,255,255,.9);text-align:center;}
+.app-link-sub{font-size:10px;color:rgba(255,255,255,.4);font-weight:600;text-align:center;}
+
+/* TAP HINT */
+.tap-hint{position:relative;z-index:2;text-align:center;padding:0 22px calc(env(safe-area-inset-bottom) + 14px);animation:fadeD .9s .7s both;}
+.tap-hint-inner{display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,.3);font-size:12px;font-weight:600;letter-spacing:.5px;}
+.tap-dots{display:flex;gap:5px;}
+.tap-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);animation:dotPulse 2s infinite;}
+.tap-dot:nth-child(2){animation-delay:.3s;}
+.tap-dot:nth-child(3){animation-delay:.6s;}
+@keyframes dotPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+
+/* MAIN APP */
+#mainApp{position:fixed;inset:0;z-index:5;transform:translateY(100%);transition:transform .7s cubic-bezier(.77,0,.18,1);background:#0a0a12;overflow-y:auto;}
+#mainApp.visible{transform:translateY(0);}
+
+.app-choose{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:80px 24px 40px;background:radial-gradient(ellipse 60% 40% at 10% 0%,rgba(108,99,255,.12) 0%,transparent 60%),radial-gradient(ellipse 40% 50% at 90% 100%,rgba(230,52,98,.08) 0%,transparent 60%),#0a0a12;}
+
+/* BACK BUTTON — fixed top left */
+.ac-back{
+  position:fixed;
+  top:calc(env(safe-area-inset-top) + 14px);
+  left:16px;
+  z-index:200;
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:12px;padding:9px 16px;
+  color:rgba(255,255,255,.8);
+  font-family:var(--font-b);font-size:13px;font-weight:700;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.ac-back:hover{background:rgba(255,255,255,.18);}
+
+.ac-title{font-family:var(--font-h);font-size:36px;letter-spacing:3px;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,#fff,rgba(255,255,255,.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ac-sub{font-size:14px;color:rgba(255,255,255,.35);text-align:center;margin-bottom:32px;}
+.ac-cards{display:flex;flex-direction:column;gap:14px;width:100%;max-width:360px;}
+.ac-card{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:22px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .25s;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+.ac-card:hover,.ac-card:active{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.1);transform:translateX(6px);}
+.ac-icon{width:58px;height:58px;border-radius:16px;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,255,255,.15);}
+.ac-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+.ac-body{flex:1;}
+.ac-name{font-size:18px;font-weight:800;color:#fff;margin-bottom:4px;}
+.ac-desc{font-size:12px;color:rgba(255,255,255,.4);line-height:1.4;}
+.ac-arr{font-size:20px;color:rgba(255,255,255,.25);}
+
+/* PARTICLES */
+.particles{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);animation:float linear infinite;}
+@keyframes float{from{transform:translateY(110vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:.5}to{transform:translateY(-10vh) scale(1);opacity:0}}
+@keyframes fadeD{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash" onclick="enterApp()">
+  <div class="splash-bg" id="splashBg">
+    <div class="no-bg-art" id="noBgArt"><div class="big-icon">🎌</div></div>
+  </div>
+  <div class="particles" id="particles"></div>
+
+  <button class="change-bg-btn" id="changeBgBtn" onclick="triggerBgPick(event)">🖼️ Set Wallpaper</button>
+  <input type="file" id="bgPicker" accept="image/*" onchange="setBg(event)"/>
+
+  <div class="splash-top">
+    <div class="splash-time" id="splashTime">00:00</div>
+    <div class="splash-date-col">
+      <div class="splash-date" id="splashDate">--</div>
+      <div class="splash-day"  id="splashDay">--</div>
+    </div>
+  </div>
+
+  <div class="splash-mid">
+    <div class="greeting-tag" id="greetTag">🌙 Good Night</div>
+    <div class="greeting-name" id="siteNameEl">HASSAN</div>
+    <div class="greeting-sub">
+      <span class="quote-mark">"</span><span id="quoteText">The world is not beautiful, therefore it is.</span><span class="quote-mark">"</span>
+    </div>
+  </div>
+
+  <div class="splash-stats">
+    <div class="sstat"><div class="sstat-icon">🎌</div><div class="sstat-n" id="stAnime">0</div><div class="sstat-l">Anime</div></div>
+    <div class="sstat"><div class="sstat-icon">🎬</div><div class="sstat-n" id="stLinks">0</div><div class="sstat-l">Links</div></div>
+    <div class="sstat"><div class="sstat-icon">❤️</div><div class="sstat-n" id="stFavs">0</div><div class="sstat-l">Faves</div></div>
+  </div>
+
+  <div class="app-links">
+    <div class="app-link" onclick="goApp('rv',event)">
+      <div class="app-link-icon"><img src="icon.svg" onerror="this.src='icon-rv.svg'" alt="RV"/></div>
+      <div class="app-link-name">ReelsVault</div>
+      <div class="app-link-sub">Saved links</div>
+    </div>
+    <div class="app-link" onclick="goApp('av',event)">
+      <div class="app-link-icon"><img src="icon.svg" alt="AV"/></div>
+      <div class="app-link-name">AnimeVault</div>
+      <div class="app-link-sub">My anime list</div>
+    </div>
+  </div>
+
+  <div class="tap-hint">
+    <div class="tap-hint-inner">
+      <div class="tap-dots"><div class="tap-dot"></div><div class="tap-dot"></div><div class="tap-dot"></div></div>
+      <span>Tap anywhere to continue</span>
+      <div class="tap-dots"><div class="tap-dot"></div><div class="tap-dot"></div><div class="tap-dot"></div></div>
+    </div>
+    <!-- Install App Button — shows only when installable -->
+    <button id="installBtn" onclick="triggerInstall(event)" style="display:none;margin-top:12px;background:rgba(255,255,255,0.12);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:9px 22px;color:#fff;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent;transition:all .2s;">
+      📲 Install App
+    </button>
+  </div>
+</div>
+
+<!-- MAIN APP PANEL -->
+<div id="mainApp">
+  <div class="app-choose">
+    <button class="ac-back" onclick="backToSplash()">← Back</button>
+    <div class="ac-title" id="vaultTitle">YOUR VAULT</div>
+    <div class="ac-sub">Choose where to go</div>
+    <div class="ac-cards">
+      <a class="ac-card" href="reelsvault.html">
+        <div class="ac-icon"><img src="icon.svg" alt="RV"/></div>
+        <div class="ac-body">
+          <div class="ac-name">ReelsVault</div>
+          <div class="ac-desc">Your saved Instagram, TikTok, YouTube links with download support</div>
+        </div>
+        <span class="ac-arr">→</span>
+      </a>
+      <a class="ac-card" href="animevault/index.html">
+        <div class="ac-icon"><img src="icon.svg" alt="AV"/></div>
+        <div class="ac-body">
+          <div class="ac-name">AnimeVault</div>
+          <div class="ac-desc">Track your anime — watching, completed, ratings & reviews</div>
+        </div>
+        <span class="ac-arr">→</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUOTES = [
+  "The world is not beautiful, therefore it is.",
+  "Whatever you lose, you'll find it again. But what you throw away you'll never get back.",
+  "A lesson without pain is meaningless.",
+  "It's not the face that makes someone a monster, it's the choices they make.",
+  "If you don't take risks, you can't create a future.",
+  "The only home truly worthy of you is where you are loved.",
+  "Knowing you're different is only the beginning.",
+  "Sometimes you must hurt in order to know, fall in order to grow.",
+  "Being weak is nothing to be ashamed of. Staying weak is.",
+  "No matter how hard or impossible it is, never lose sight of your goal.",
+  "Protecting someone means giving them a place to belong.",
+  "Hard work is absolutely worthless without talent.",
+  "People's lives don't end when they die. It ends when they lose faith.",
+];
+
+function tick() {
+  const now = new Date();
+  const h = now.getHours(), m = String(now.getMinutes()).padStart(2,'0');
+  const h12 = h%12||12;
+  document.getElementById('splashTime').textContent = h12+':'+m;
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('splashDate').textContent = months[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+  document.getElementById('splashDay').textContent  = days[now.getDay()];
+  const g = h<5?['🌙','Good Night']:h<12?['🌤️','Good Morning']:h<17?['☀️','Good Afternoon']:h<21?['🌆','Good Evening']:['🌙','Good Night'];
+  document.getElementById('greetTag').textContent = g[0]+' '+g[1];
+}
+tick(); setInterval(tick,30000);
+
+function setQuote(){ document.getElementById('quoteText').textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)]; }
+setQuote();
+
+function loadStats(){
+  try{
+    const av=JSON.parse(localStorage.getItem('av5')||localStorage.getItem('av4')||'[]');
+    const rv=JSON.parse(localStorage.getItem('rv6')||localStorage.getItem('rv5')||'[]');
+    document.getElementById('stAnime').textContent=av.length;
+    document.getElementById('stLinks').textContent=rv.length;
+    document.getElementById('stFavs').textContent=[...av,...rv].filter(x=>x.fav).length;
+  }catch{}
+}
+loadStats();
+
+function loadSiteName(){
+  const n=localStorage.getItem('vault_name')||'HASSAN';
+  document.getElementById('siteNameEl').textContent=n;
+  document.getElementById('vaultTitle').textContent=n+"'S VAULT";
+}
+loadSiteName();
+
+function triggerBgPick(e){ e.stopPropagation(); document.getElementById('bgPicker').click(); }
+function setBg(e){
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    localStorage.setItem('splash_bg',ev.target.result);
+    applyBg(ev.target.result);
+  };
+  r.readAsDataURL(file);
+}
+function applyBg(data){
+  const bg=document.getElementById('splashBg');
+  bg.style.backgroundImage="url('"+data+"')";
+  document.getElementById('noBgArt').style.display='none';
+  document.getElementById('changeBgBtn').innerHTML='🖼️ Change Wallpaper';
+}
+(function(){ const s=localStorage.getItem('splash_bg'); if(s)applyBg(s); })();
+
+function spawnParticles(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<16;i++){
+    const p=document.createElement('div'); p.className='particle';
+    const sz=Math.random()*4+2;
+    p.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;animation-duration:'+(Math.random()*12+8)+'s;animation-delay:'+(Math.random()*8)+'s;opacity:'+(Math.random()*.4+.1)+';';
+    c.appendChild(p);
+  }
+}
+spawnParticles();
+
+function enterApp(){ document.getElementById('splash').classList.add('exit'); document.getElementById('mainApp').classList.add('visible'); }
+function backToSplash(){ document.getElementById('mainApp').classList.remove('visible'); setTimeout(()=>document.getElementById('splash').classList.remove('exit'),100); setQuote(); loadStats(); }
+function goApp(app,e){
+  e.stopPropagation();
+  window.location.href = app==='rv'?'reelsvault.html':'animevault/index.html';
+}
+
+/* ── SERVICE WORKER REGISTRATION ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(err => console.log('SW failed:', err));
+  });
+}
+
+/* ── PWA INSTALL PROMPT ── */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button
+  const btn = document.getElementById('installBtn');
+  if (btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  const btn = document.getElementById('installBtn');
+  if (btn) btn.style.display = 'none';
+});
+function triggerInstall(e) {
+  e.stopPropagation();
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  }
+}
+</script>
+</body>
+</html>
